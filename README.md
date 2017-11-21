@@ -1,6 +1,11 @@
 # Minimal Parameter Network.
 
-What's the best error we can achieve using &lt; 500k parameters?
+What's the best error I can achieve on CIFAR10 using as few parameters as possible?
+
+
+Currently - First test. 41k parameters (less parameters than training images!)
+
+Validation accuracy > 75%.
 
 
 ```
