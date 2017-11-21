@@ -62,10 +62,10 @@ predictions = Dense(10, activation='softmax')(x)
 
 
 
-opt = Adam(lr=0.001, decay =0.01)
+
 model = Model(inputs=inputs, outputs=predictions)
 
-model.compile(optimizer=opt,
+model.compile(optimizer='rmsprop',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
@@ -93,3 +93,4 @@ model.fit_generator(datagen.flow(x_train, y_train,
                         epochs=epochs,
                         validation_data=(x_test, y_test),
                         workers=8)
+
