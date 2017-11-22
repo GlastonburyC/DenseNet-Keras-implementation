@@ -5,7 +5,7 @@ What's the best error I can achieve on CIFAR10 using as few parameters as possib
 
 Currently - First test. 171,498 parameters.
 
-Validation accuracy > 70%.
+Validation accuracy > 76%.
 
 
 ```
