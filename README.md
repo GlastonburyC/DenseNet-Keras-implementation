@@ -3,63 +3,65 @@
 What's the best error I can achieve on CIFAR10 using as few parameters as possible?
 
 
-Currently - First test. 41k parameters (less parameters than training images!)
+Currently - First test. 171,498 parameters.
 
-Validation accuracy > 75%.
+Validation accuracy > 70%.
 
 
 ```
+>>> model.summary()
 _________________________________________________________________
 Layer (type)                 Output Shape              Param #   
 =================================================================
-input_11 (InputLayer)        (None, 32, 32, 3)         0         
+input_26 (InputLayer)        (None, 32, 32, 3)         0         
 _________________________________________________________________
-conv2d_47 (Conv2D)           (None, 32, 32, 32)        896       
+conv2d_139 (Conv2D)          (None, 32, 32, 32)        896       
 _________________________________________________________________
-average_pooling2d_9 (Average (None, 16, 16, 32)        0         
+batch_normalization_140 (Bat (None, 32, 32, 32)        128       
 _________________________________________________________________
-batch_normalization_38 (Batc (None, 16, 16, 32)        128       
+p_re_lu_140 (PReLU)          (None, 32, 32, 32)        32768     
 _________________________________________________________________
-p_re_lu_38 (PReLU)           (None, 16, 16, 32)        8192      
+dropout_128 (Dropout)        (None, 32, 32, 32)        0         
 _________________________________________________________________
-dropout_27 (Dropout)         (None, 16, 16, 32)        0         
+conv2d_140 (Conv2D)          (None, 32, 32, 32)        9248      
 _________________________________________________________________
-conv2d_48 (Conv2D)           (None, 16, 16, 32)        9248      
+average_pooling2d_99 (Averag (None, 16, 16, 32)        0         
 _________________________________________________________________
-average_pooling2d_10 (Averag (None, 8, 8, 32)          0         
+batch_normalization_141 (Bat (None, 16, 16, 32)        128       
 _________________________________________________________________
-batch_normalization_39 (Batc (None, 8, 8, 32)          128       
+p_re_lu_141 (PReLU)          (None, 16, 16, 32)        8192      
 _________________________________________________________________
-p_re_lu_39 (PReLU)           (None, 8, 8, 32)          2048      
+dropout_129 (Dropout)        (None, 16, 16, 32)        0         
 _________________________________________________________________
-dropout_28 (Dropout)         (None, 8, 8, 32)          0         
+conv2d_141 (Conv2D)          (None, 16, 16, 32)        9248      
 _________________________________________________________________
-conv2d_49 (Conv2D)           (None, 8, 8, 32)          9248      
+average_pooling2d_100 (Avera (None, 8, 8, 32)          0         
 _________________________________________________________________
-average_pooling2d_11 (Averag (None, 4, 4, 32)          0         
+batch_normalization_142 (Bat (None, 8, 8, 32)          128       
 _________________________________________________________________
-batch_normalization_40 (Batc (None, 4, 4, 32)          128       
+p_re_lu_142 (PReLU)          (None, 8, 8, 32)          2048      
 _________________________________________________________________
-p_re_lu_40 (PReLU)           (None, 4, 4, 32)          512       
+dropout_130 (Dropout)        (None, 8, 8, 32)          0         
 _________________________________________________________________
-dropout_29 (Dropout)         (None, 4, 4, 32)          0         
+conv2d_142 (Conv2D)          (None, 8, 8, 32)          9248      
 _________________________________________________________________
-conv2d_50 (Conv2D)           (None, 4, 4, 32)          9248      
+average_pooling2d_101 (Avera (None, 4, 4, 32)          0         
 _________________________________________________________________
-average_pooling2d_12 (Averag (None, 2, 2, 32)          0         
+batch_normalization_143 (Bat (None, 4, 4, 32)          128       
 _________________________________________________________________
-batch_normalization_41 (Batc (None, 2, 2, 32)          128       
+p_re_lu_143 (PReLU)          (None, 4, 4, 32)          512       
 _________________________________________________________________
-p_re_lu_41 (PReLU)           (None, 2, 2, 32)          128       
+dropout_131 (Dropout)        (None, 4, 4, 32)          0         
 _________________________________________________________________
-dropout_30 (Dropout)         (None, 2, 2, 32)          0         
+dense_27 (Dense)             (None, 4, 4, 512)         16896     
 _________________________________________________________________
-flatten_11 (Flatten)         (None, 128)               0         
+flatten_25 (Flatten)         (None, 8192)              0         
 _________________________________________________________________
-dense_11 (Dense)             (None, 10)                1290      
+dense_28 (Dense)             (None, 10)                81930     
 =================================================================
-Total params: 41,322
-Trainable params: 41,066
+Total params: 171,498
+Trainable params: 171,242
 Non-trainable params: 256
 _________________________________________________________________
+
 ```
