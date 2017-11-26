@@ -1,4 +1,82 @@
-opt = keras.optimizers.rmsprop(lr=0.001, decay=1e-6)
+from keras.layers import Conv2D, BatchNormalization, Dense, Dropout, merge, ZeroPadding2D
+from keras.layers import concatenate, GlobalAveragePooling2D,MaxPooling2D, PReLU, Input, Flatten,AveragePooling2D
+from keras import losses
+from keras.models import Model
+import keras
+import os, sys, wget
+import tarfile
+
+from keras.datasets import cifar10
+from keras.optimizers import Adam, SGD
+
+from keras.utils import to_categorical
+from keras.preprocessing.image import ImageDataGenerator
+import numpy as np
+
+
+# load in the CIFAR10 dataset
+(x_train, y_train), (x_test, y_test) = cifar10.load_data()
+
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
+x_train /= 255
+x_test /= 255
+
+y_train = to_categorical(y_train, 10)
+y_test = to_categorical(y_test, 10)
+
+def DenseBlock(x,no_layers,stage,feature_size,k):
+    concat_layers = []
+    for i in range(0,no_layers):
+        concat_layers.append(ConvBlock(inputs=x,name_lyr='concat_'+str(stage)+'_'+str(i),k=k,feature_size=feature_size))
+        print('Adding denselayer {}'.format(i))
+    return concat_layers
+
+
+def transitionLayer(x):
+    x = BatchNormalization()(x)
+    x = Conv2D(32,(1,1),padding='same', dilation_rate = 1)(x)
+    x = Dropout(p=0.2)(x)
+    x = AveragePooling2D((2,2))(x)
+    return x
+
+def ConvBlock(inputs,name_lyr,feature_size,k):
+    x = BatchNormalization()(inputs)
+    x = PReLU(alpha_initializer='zeros')(inputs)
+    x = Conv2D(64*4,(1,1),padding='same', dilation_rate = 1,name=name_lyr)(inputs)
+    x = BatchNormalization()(inputs)
+    x = PReLU(alpha_initializer='zeros')(inputs)
+    x = Conv2D(64+k,(3,3),padding='same', dilation_rate = 1,name=name_lyr)(inputs)
+    return x
+
+
+inputs = Input(shape=x_train.shape[1:])
+
+x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
+x = Conv2D(64,(7,7),padding='same', dilation_rate = 1,name='init_conv')(x)
+x = MaxPooling2D((2,2))(x)
+
+dense_lst = DenseBlock(x,no_layers=6,stage=1,feature_size=32,k=12)
+x = concatenate(dense_lst)
+x = transitionLayer(x)
+
+dense_lst2 = DenseBlock(x,no_layers=12,stage=2,feature_size=16,k=24)
+x = concatenate(dense_lst2)
+x = transitionLayer(x)
+
+dense_lst3 = DenseBlock(x,no_layers=24,stage=3,feature_size=8,k=36)
+x = concatenate(dense_lst3)
+x = transitionLayer(x)
+
+x = GlobalAveragePooling2D()(x)
+#x = Flatten()(x)
+predictions = Dense(10, activation='softmax')(x)
+
+model = Model(inputs=inputs, outputs=predictions)
+
+model.summary()
+
+opt = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True)
 
 model.compile(optimizer=opt,
               loss='categorical_crossentropy',
