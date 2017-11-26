@@ -28,10 +28,8 @@ y_test = to_categorical(y_test, 10)
 
 def DenseBlock(x,no_layers):
     for i in range(0,no_layers):
-        x = Conv2D(16,(3,3),padding='same', dilation_rate = 2)(x)
-        x = BatchNormalization()(x)
-        x = PReLU(alpha_initializer='zeros')(x)
-        x = Conv2D(16,(3,3),padding='same', dilation_rate = 2)(x)
+        x = ConvBlock(inputs)
+        concat_layers = merge([concat_layers, x], mode='concat', concat_axis=concat_axis, name='concat_'+str(no_layers))
     return x
 
 
@@ -53,12 +51,7 @@ inputs = Input(shape=x_train.shape[1:])
 
 x = ConvBlock(inputs)
 x = MaxPooling2D((2,2))(x)
-x1 = DenseBlock(x)
-x2= DenseBlock(x1)
-x3 = DenseBlock(x2)
-x4 = DenseBlock(x3)
-x5 = DenseBlock(x4)
-x6 = DenseBlock(x5)
+x = DenseBlock(x,no_layers=6)
 x = concatenate([x1,x2,x3,x4,x5,x6])
 
 x = transitionLayer(x)
