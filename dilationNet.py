@@ -13,7 +13,6 @@ from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 
-
 # load in the CIFAR10 dataset
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
@@ -26,9 +25,11 @@ y_train = to_categorical(y_train, 10)
 y_test = to_categorical(y_test, 10)
 
 def DenseBlock(x,no_layers,stage,feature_size,k):
+    nb_feat=0
     concat_layers = []
     for i in range(0,no_layers):
-        concat_layers.append(ConvBlock(inputs=x,name_lyr='concat_'+str(stage)+'_'+str(i),k=k,feature_size=feature_size))
+        nb_feat += k
+        concat_layers.append(ConvBlock(inputs=x,name_lyr='concat_'+str(stage)+'_'+str(i),k=nb_feat,feature_size=feature_size))
         print('Adding denselayer {}'.format(i))
     return concat_layers
 
@@ -46,9 +47,10 @@ def ConvBlock(inputs,name_lyr,feature_size,k):
     x = Conv2D(64*4,(1,1),padding='same', dilation_rate = 1,name=name_lyr)(inputs)
     x = BatchNormalization()(inputs)
     x = PReLU(alpha_initializer='zeros')(inputs)
-    x = Conv2D(64+k,(3,3),padding='same', dilation_rate = 1,name=name_lyr)(inputs)
+    x = Conv2D(k,(3,3),padding='same', dilation_rate = 1,name=name_lyr)(inputs)
     return x
 
+k = 12
 
 inputs = Input(shape=x_train.shape[1:])
 
@@ -56,15 +58,15 @@ x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
 x = Conv2D(64,(7,7),padding='same', dilation_rate = 1,name='init_conv')(x)
 x = MaxPooling2D((2,2))(x)
 
-dense_lst = DenseBlock(x,no_layers=6,stage=1,feature_size=32,k=12)
+dense_lst = DenseBlock(x,no_layers=6,stage=1,feature_size=32,k=k)
 x = concatenate(dense_lst)
 x = transitionLayer(x)
 
-dense_lst2 = DenseBlock(x,no_layers=12,stage=2,feature_size=16,k=24)
+dense_lst2 = DenseBlock(x,no_layers=12,stage=2,feature_size=16,k=k)
 x = concatenate(dense_lst2)
 x = transitionLayer(x)
 
-dense_lst3 = DenseBlock(x,no_layers=24,stage=3,feature_size=8,k=36)
+dense_lst3 = DenseBlock(x,no_layers=24,stage=3,feature_size=8,k=k)
 x = concatenate(dense_lst3)
 x = transitionLayer(x)
 
@@ -105,4 +107,3 @@ model.fit_generator(datagen.flow(x_train, y_train,
                         epochs=epochs,
                         validation_data=(x_test, y_test),
                         workers=8)
-
