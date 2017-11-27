@@ -42,12 +42,13 @@ def transitionLayer(x):
 
 def ConvBlock(inputs,name_lyr,feature_size,k):
     x = BatchNormalization()(inputs)
-    x = PReLU(alpha_initializer='zeros')(inputs)
-    x = Conv2D(64*4,(1,1),padding='same', dilation_rate = 1,name=name_lyr)(inputs)
-    x = BatchNormalization()(inputs)
-    x = PReLU(alpha_initializer='zeros')(inputs)
+    x = PReLU(alpha_initializer='zeros')(x)
+    x = Conv2D(64*4,(1,1),padding='same', dilation_rate = 1,name=name_lyr)(x)
+    x = BatchNormalization()(x)
+    x = PReLU(alpha_initializer='zeros')(x)
     x = Dropout(p=0.5)(x)
-    x = Conv2D(k,(3,3),padding='same', dilation_rate = 1,name=name_lyr)(inputs)
+    x = ZeroPadding2D((1, 1))(x)
+    x = Conv2D(k,(3,3),padding='same', dilation_rate = 1,name=name_lyr)(x)
     return x
 
 k = 12
