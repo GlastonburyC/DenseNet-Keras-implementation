@@ -37,7 +37,6 @@ def DenseBlock(x,no_layers,stage,feature_size,k):
 def transitionLayer(x):
     x = BatchNormalization()(x)
     x = Conv2D(32,(1,1),padding='same', dilation_rate = 1)(x)
-    x = Dropout(p=0.2)(x)
     x = AveragePooling2D((2,2))(x)
     return x
 
@@ -47,6 +46,7 @@ def ConvBlock(inputs,name_lyr,feature_size,k):
     x = Conv2D(64*4,(1,1),padding='same', dilation_rate = 1,name=name_lyr)(inputs)
     x = BatchNormalization()(inputs)
     x = PReLU(alpha_initializer='zeros')(inputs)
+    x = Dropout(p=0.2)(x)
     x = Conv2D(k,(3,3),padding='same', dilation_rate = 1,name=name_lyr)(inputs)
     return x
 
