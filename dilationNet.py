@@ -56,8 +56,11 @@ k = 12
 
 inputs = Input(shape=x_train.shape[1:])
 
-x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
-x = Conv2D(32,(3,3),padding='same', dilation_rate = 1,name='init_conv')(x)
+x = ZeroPadding2D((4, 4), name='conv1_zeropadding')(inputs)
+x = Conv2D(32,(6,6),padding='same', dilation_rate = 1,name='init_conv')(x)
+x = PReLU(alpha_initializer='zeros')(x)
+x = BatchNormalization()(x)
+x = ZeroPadding2D((1, 1), name='pool1_zeropadding')(x)
 x = MaxPooling2D((2,2))(x)
 
 dense_lst = DenseBlock(x,no_layers=6,stage=1,feature_size=32,k=k)
