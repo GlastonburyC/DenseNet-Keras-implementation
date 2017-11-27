@@ -29,7 +29,7 @@ def DenseBlock(x,no_layers,stage,feature_size,k):
     concat_layers = []
     for i in range(0,no_layers):
         nb_feat += k
-        concat_layers.append(ConvBlock(inputs=x,name_lyr='concat_'+str(stage)+'_'+str(i),k=nb_feat,feature_size=feature_size))
+        concat_layers.append(ConvBlock(inputs=x,name_lyr='concat'+str(np.random.random_integers(0,1000000,1)[0]),k=nb_feat,feature_size=feature_size))
         print('Adding denselayer {}'.format(i))
     return concat_layers
 
@@ -37,19 +37,19 @@ def DenseBlock(x,no_layers,stage,feature_size,k):
 def transitionLayer(x):
     x = BatchNormalization()(x)
     x = Conv2D(32,(1,1),padding='same', dilation_rate = 1)(x)
-    x = AveragePooling2D((2,2))(x)
-    return x
+    out = AveragePooling2D((2,2))(x)
+    return out
 
 def ConvBlock(inputs,name_lyr,feature_size,k):
-    x = BatchNormalization()(inputs)
-    x = PReLU(alpha_initializer='zeros')(x)
-    x = Conv2D(64*4,(1,1),padding='same', dilation_rate = 1,name=name_lyr)(x)
-    x = BatchNormalization()(x)
-    x = PReLU(alpha_initializer='zeros')(x)
-    x = Dropout(p=0.5)(x)
-    x = ZeroPadding2D((1, 1))(x)
-    x = Conv2D(k,(3,3),padding='same', dilation_rate = 1,name=name_lyr)(x)
-    return x
+    inputs = BatchNormalization()(inputs)
+    inputs = PReLU(alpha_initializer='zeros')(inputs)
+    inputs = Conv2D(32,(1,1),padding='same', dilation_rate = 1)(inputs)
+    inputs = BatchNormalization()(inputs)
+    inputs = PReLU(alpha_initializer='zeros')(inputs)
+    inputs = Dropout(p=0.5)(inputs)
+    inputs = ZeroPadding2D((1, 1))(inputs)
+    out = Conv2D(k,(3,3),padding='same', dilation_rate = 1)(inputs)
+    return out
 
 k = 12
 
