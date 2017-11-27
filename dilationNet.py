@@ -37,6 +37,7 @@ def DenseBlock(x,no_layers,stage,feature_size,k):
 def transitionLayer(x):
     x = BatchNormalization()(x)
     x = Conv2D(32,(1,1),padding='same', dilation_rate = 1)(x)
+    x = Dropout(p=0.5)(x)
     out = AveragePooling2D((2,2))(x)
     return out
 
