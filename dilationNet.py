@@ -4,6 +4,7 @@ from keras.activations import relu
 from keras import losses
 from keras.models import Model
 from keras.layers import Activation
+from keras.regularizers import l2
 import keras
 import os, sys, wget
 import tarfile
@@ -44,11 +45,11 @@ def transitionLayer(x,nb_filters):
 
 def ConvBlock(x,name_lyr,nb_filters):
     x = BatchNormalization()(x)
-    x = Conv2D(int(nb_filters*4),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),bias=False)(x)
+    x = Conv2D(int(nb_filters*4),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
     x = Dropout(p=0.2)(x)
     x = BatchNormalization()(x)
     x = ZeroPadding2D((1, 1))(x)
-    out = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),bias=False)(x)
+    out = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
     return out
 
 nb_filters = 12
@@ -56,7 +57,7 @@ grow_rt = 12
 inputs = Input(shape=x_train.shape[1:])
 
 x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
-x = Conv2D(12,(6,6),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),bias=False)(x)
+x = Conv2D(12,(6,6),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
 x = BatchNormalization()(x)
 x = ZeroPadding2D((1, 1), name='pool1_zeropadding')(x)
 x = MaxPooling2D((2,2),strides=2)(x)
