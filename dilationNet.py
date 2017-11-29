@@ -46,7 +46,7 @@ def transitionLayer(x,nb_filters):
 
 def ConvBlock(x,name_lyr,nb_filters):
     x = BatchNormalization()(x)
-    x = Conv2D(int(nb_filters*4),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
+    x = Conv2D(int(nb_filters*0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
     x = Dropout(p=0.2)(x)
     x = BatchNormalization()(x)
     #x = ZeroPadding2D((1, 1))(x)
