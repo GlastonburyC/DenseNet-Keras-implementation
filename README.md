@@ -9,3 +9,4 @@ An implementation of the DenseNet bottleneck architecture with growth rate = 12.
 ```validation accuracy y```
 
 With (2x) dilated convolutions, validation accuracy improves to:
+
