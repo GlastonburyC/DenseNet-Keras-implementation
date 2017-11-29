@@ -44,13 +44,11 @@ def transitionLayer(x):
 
 def ConvBlock(inputs,name_lyr,feature_size,k):
     inputs = BatchNormalization()(inputs)
-    inputs = relu(inputs)
-    inputs = Conv2D(32,(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform')(inputs)
+    inputs = Conv2D(32,(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu')(inputs)
     inputs = BatchNormalization()(inputs)
-    inputs = relu(inputs)
     inputs = Dropout(p=0.5)(inputs)
     inputs = ZeroPadding2D((1, 1))(inputs)
-    out = Conv2D(k,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform')(inputs)
+    out = Conv2D(k,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu')(inputs)
     return out
 
 k = 12
@@ -58,9 +56,8 @@ k = 12
 inputs = Input(shape=x_train.shape[1:])
 
 x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
-x = Conv2D(32,(6,6),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform')(x)
+x = Conv2D(32,(6,6),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu')(x)
 x = BatchNormalization()(x)
-x = relu(x)
 x = MaxPooling2D((2,2))(x)
 
 dense_lst = DenseBlock(x,no_layers=6,stage=1,feature_size=32,k=k)
