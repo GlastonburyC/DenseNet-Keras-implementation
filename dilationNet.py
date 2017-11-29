@@ -3,6 +3,7 @@ from keras.layers import concatenate, GlobalAveragePooling2D,MaxPooling2D, Input
 from keras.activations import relu
 from keras import losses
 from keras.models import Model
+from keras.layers import Activation
 import keras
 import os, sys, wget
 import tarfile
@@ -25,67 +26,66 @@ x_test /= 255
 y_train = to_categorical(y_train, 10)
 y_test = to_categorical(y_test, 10)
 
-def DenseBlock(x,no_layers,stage,feature_size,k):
-    nb_feat=0
+def DenseBlock(x,no_layers,nb_filters,stage):
     concat_layers = []
     for i in range(0,no_layers):
-        nb_feat += k
-        concat_layers.append(ConvBlock(inputs=x,name_lyr='concat'+str(np.random.random_integers(0,1000000,1)[0]),k=nb_feat,feature_size=feature_size))
+        concat_layers.append(ConvBlock(inputs=x,name_lyr='concat'+str(np.random.random_integers(0,1000000,1)[0]),nb_filters=nb_filters))
         print('Adding denselayer {}'.format(i))
+        
     return concat_layers
 
 
-def transitionLayer(x):
-    x = BatchNormalization()(x)
-    x = Conv2D(32,(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform')(x)
+def transitionLayer(x,nb_filters):
+    x = BatchNormalization(epsilon = 1.1e-5)(x)
+    x = Conv2D(int(nb_filters * 0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',bias=False)(x)
     x = Dropout(p=0.5)(x)
-    out = AveragePooling2D((2,2))(x)
-    return out
+    x = AveragePooling2D((2,2))(x)
+    return x
 
-def ConvBlock(inputs,name_lyr,feature_size,k):
-    inputs = BatchNormalization()(inputs)
-    inputs = Conv2D(32,(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu')(inputs)
-    inputs = BatchNormalization()(inputs)
-    inputs = Dropout(p=0.5)(inputs)
-    inputs = ZeroPadding2D((1, 1))(inputs)
-    out = Conv2D(k,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu')(inputs)
-    return out
+def ConvBlock(inputs,name_lyr,nb_filters):
+    x = BatchNormalization()(inputs)
+    x = Conv2D(int(nb_filters),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu')(x)
+    x = Dropout(p=0.5)(x)
+    x = BatchNormalization()(x)
+    x = ZeroPadding2D((1, 1))(x)
+    x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu')(x)
+    return x 
 
-k = 12
-
+nb_filters = 32
+grow_rt = 12
 inputs = Input(shape=x_train.shape[1:])
 
 x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
-x = Conv2D(32,(6,6),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu')(x)
+x = Conv2D(64,(6,6),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu')(x)
 x = BatchNormalization()(x)
+x = ZeroPadding2D((1, 1), name='pool1_zeropadding')(x)
 x = MaxPooling2D((2,2))(x)
 
-dense_lst = DenseBlock(x,no_layers=6,stage=1,feature_size=32,k=k)
+nb_filters+=grow_rt
+dense_lst = DenseBlock(x,no_layers=6,stage=1,nb_filters=nb_filters)
 x = concatenate(dense_lst)
-x = transitionLayer(x)
+x = transitionLayer(x,nb_filters=nb_filters)
 
-dense_lst2 = DenseBlock(x,no_layers=12,stage=2,feature_size=16,k=k)
+nb_filters+=grow_rt
+dense_lst2 = DenseBlock(x,no_layers=12,stage=2,nb_filters=nb_filters)
 x = concatenate(dense_lst2)
-x = transitionLayer(x)
+x = transitionLayer(x,nb_filters=nb_filters)
 
-dense_lst3 = DenseBlock(x,no_layers=24,stage=3,feature_size=8,k=k)
+nb_filters+=grow_rt
+dense_lst3 = DenseBlock(x,no_layers=24,stage=3,nb_filters=nb_filters)
 x = concatenate(dense_lst3)
-x = transitionLayer(x)
 
-
-dense_lst4 = DenseBlock(x,no_layers=12,stage=3,feature_size=8,k=k)
-x = concatenate(dense_lst4)
-x = transitionLayer(x)
-
+x = BatchNormalization(epsilon=1.1e-5)(x)
+x = Activation('relu')(x)
 x = GlobalAveragePooling2D()(x)
-#x = Flatten()(x)
+
 predictions = Dense(10, activation='softmax')(x)
 
 model = Model(inputs=inputs, outputs=predictions)
 
 model.summary()
 
-opt = RMSprop(lr=0.01, decay=1e-4)
+opt = SGD(lr=0.01, decay=1e-4)
 model.compile(optimizer=opt,
               loss='categorical_crossentropy',
               metrics=['accuracy'])
