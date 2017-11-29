@@ -1,5 +1,6 @@
 from keras.layers import Conv2D, BatchNormalization, Dense, Dropout, merge, ZeroPadding2D
-from keras.layers import concatenate, GlobalAveragePooling2D,MaxPooling2D, PReLU, Input, Flatten,AveragePooling2D
+from keras.layers import concatenate, GlobalAveragePooling2D,MaxPooling2D, Input, Flatten,AveragePooling2D
+from keras.activations import relu
 from keras import losses
 from keras.models import Model
 import keras
@@ -36,31 +37,30 @@ def DenseBlock(x,no_layers,stage,feature_size,k):
 
 def transitionLayer(x):
     x = BatchNormalization()(x)
-    x = Conv2D(32,(1,1),padding='same', dilation_rate = 1)(x)
+    x = Conv2D(32,(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform')(x)
     x = Dropout(p=0.5)(x)
     out = AveragePooling2D((2,2))(x)
     return out
 
 def ConvBlock(inputs,name_lyr,feature_size,k):
     inputs = BatchNormalization()(inputs)
-    inputs = PReLU(alpha_initializer='zeros')(inputs)
-    inputs = Conv2D(32,(1,1),padding='same', dilation_rate = 1)(inputs)
+    inputs = relu(inputs)
+    inputs = Conv2D(32,(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform')(inputs)
     inputs = BatchNormalization()(inputs)
-    inputs = PReLU(alpha_initializer='zeros')(inputs)
+    inputs = relu(inputs)
     inputs = Dropout(p=0.5)(inputs)
     inputs = ZeroPadding2D((1, 1))(inputs)
-    out = Conv2D(k,(3,3),padding='same', dilation_rate = 1)(inputs)
+    out = Conv2D(k,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform')(inputs)
     return out
 
 k = 12
 
 inputs = Input(shape=x_train.shape[1:])
 
-x = ZeroPadding2D((4, 4), name='conv1_zeropadding')(inputs)
-x = Conv2D(32,(6,6),padding='same', dilation_rate = 1,name='init_conv')(x)
+x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
+x = Conv2D(32,(6,6),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform')(x)
 x = BatchNormalization()(x)
-x = PReLU(alpha_initializer='zeros')(x)
-x = ZeroPadding2D((1, 1), name='pool1_zeropadding')(x)
+x = relu(x)
 x = MaxPooling2D((2,2))(x)
 
 dense_lst = DenseBlock(x,no_layers=6,stage=1,feature_size=32,k=k)
