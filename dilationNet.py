@@ -77,7 +77,7 @@ x = transitionLayer(x)
 
 
 dense_lst4 = DenseBlock(x,no_layers=12,stage=3,feature_size=8,k=k)
-x = concatenate(dense_lst3)
+x = concatenate(dense_lst4)
 x = transitionLayer(x)
 
 x = GlobalAveragePooling2D()(x)
