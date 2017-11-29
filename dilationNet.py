@@ -7,7 +7,7 @@ import os, sys, wget
 import tarfile
 
 from keras.datasets import cifar10
-from keras.optimizers import Adam, SGD
+from keras.optimizers import Adam, SGD,RMSprop
 
 from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator
@@ -75,6 +75,11 @@ dense_lst3 = DenseBlock(x,no_layers=24,stage=3,feature_size=8,k=k)
 x = concatenate(dense_lst3)
 x = transitionLayer(x)
 
+
+dense_lst4 = DenseBlock(x,no_layers=12,stage=3,feature_size=8,k=k)
+x = concatenate(dense_lst3)
+x = transitionLayer(x)
+
 x = GlobalAveragePooling2D()(x)
 #x = Flatten()(x)
 predictions = Dense(10, activation='softmax')(x)
@@ -83,8 +88,7 @@ model = Model(inputs=inputs, outputs=predictions)
 
 model.summary()
 
-opt = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-
+opt = RMSprop(lr=0.01, decay=1e-4)
 model.compile(optimizer=opt,
               loss='categorical_crossentropy',
               metrics=['accuracy'])
