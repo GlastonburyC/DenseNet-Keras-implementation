@@ -14,7 +14,7 @@ from keras.optimizers import Adam, SGD,RMSprop
 from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
-
+from keras.callbacks import ReduceLROnPlateau
 # load in the CIFAR10 dataset
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
@@ -29,7 +29,7 @@ y_test = to_categorical(y_test, 10)
 def DenseBlock(x,no_layers,nb_filters,stage):
     concat_layers = []
     for i in range(0,no_layers):
-        concat_layers.append(ConvBlock(inputs=x,name_lyr='concat'+str(np.random.random_integers(0,1000000,1)[0]),nb_filters=nb_filters))
+        concat_layers.append(ConvBlock(x,name_lyr='concat'+str(np.random.random_integers(0,1000000,1)[0]),nb_filters=nb_filters))
         print('Adding denselayer {}'.format(i))
         
     return concat_layers
@@ -38,41 +38,44 @@ def DenseBlock(x,no_layers,nb_filters,stage):
 def transitionLayer(x,nb_filters):
     x = BatchNormalization(epsilon = 1.1e-5)(x)
     x = Conv2D(int(nb_filters * 0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',bias=False)(x)
-    x = Dropout(p=0.5)(x)
-    x = AveragePooling2D((2,2))(x)
-    return x
+    x = Dropout(p=0.2)(x)
+    out = AveragePooling2D((2,2),strides=2)(x)
+    return out
 
-def ConvBlock(inputs,name_lyr,nb_filters):
-    x = BatchNormalization()(inputs)
-    x = Conv2D(int(nb_filters),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu')(x)
-    x = Dropout(p=0.5)(x)
+def ConvBlock(x,name_lyr,nb_filters):
+    x = BatchNormalization()(x)
+    x = Conv2D(int(nb_filters*4),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),bias=False)(x)
+    x = Dropout(p=0.2)(x)
     x = BatchNormalization()(x)
     x = ZeroPadding2D((1, 1))(x)
-    x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu')(x)
-    return x 
+    out = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),bias=False)(x)
+    return out
 
-nb_filters = 32
+nb_filters = 12
 grow_rt = 12
 inputs = Input(shape=x_train.shape[1:])
 
 x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
-x = Conv2D(64,(6,6),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu')(x)
+x = Conv2D(12,(6,6),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),bias=False)(x)
 x = BatchNormalization()(x)
 x = ZeroPadding2D((1, 1), name='pool1_zeropadding')(x)
-x = MaxPooling2D((2,2))(x)
+x = MaxPooling2D((2,2),strides=2)(x)
 
 nb_filters+=grow_rt
-dense_lst = DenseBlock(x,no_layers=6,stage=1,nb_filters=nb_filters)
+dense_lst = DenseBlock(x,no_layers=16,stage=1,nb_filters=nb_filters)
 x = concatenate(dense_lst)
+x = Dropout(p=0.2)(x)
 x = transitionLayer(x,nb_filters=nb_filters)
 
 nb_filters+=grow_rt
-dense_lst2 = DenseBlock(x,no_layers=12,stage=2,nb_filters=nb_filters)
+dense_lst2 = DenseBlock(x,no_layers=16,stage=2,nb_filters=nb_filters)
 x = concatenate(dense_lst2)
+x = Dropout(p=0.2)(x)
 x = transitionLayer(x,nb_filters=nb_filters)
 
 nb_filters+=grow_rt
-dense_lst3 = DenseBlock(x,no_layers=24,stage=3,nb_filters=nb_filters)
+dense_lst3 = DenseBlock(x,no_layers=16,stage=3,nb_filters=nb_filters)
+x = Dropout(p=0.2)(x)
 x = concatenate(dense_lst3)
 
 x = BatchNormalization(epsilon=1.1e-5)(x)
@@ -85,7 +88,11 @@ model = Model(inputs=inputs, outputs=predictions)
 
 model.summary()
 
-opt = SGD(lr=0.01, decay=1e-4)
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5,
+                              patience=5, min_lr=0.0001)
+
+
+opt = SGD(lr=0.1, decay=1e-4)
 model.compile(optimizer=opt,
               loss='categorical_crossentropy',
               metrics=['accuracy'])
@@ -107,7 +114,7 @@ epochs=400
 model.fit(x_train, y_train,
                          batch_size=128,
                         epochs=epochs,
-                        validation_data=(x_test, y_test))
+                        validation_data=(x_test, y_test),callbacks=[reduce_lr])
 
 # model.fit_generator(datagen.flow(x_train, y_train,
 #                                      batch_size=128),
