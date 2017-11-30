@@ -31,7 +31,8 @@ def DenseBlock(x,no_layers,nb_filters,stage,grow_rt):
     concat_layers = [x]
     for i in range(0,no_layers):
         conv_b = ConvBlock(x,name_lyr='concat'+str(stage)+str(np.random.random_integers(0,1000000,1)[0]),nb_filters=nb_filters)
-        x = concatenate([x, conv_b])
+        concat_layers.append(conv_b)
+        x = Concatenate(axis=-1)(concat_layers)
         nb_filters += grow_rt
         print('Adding denselayer {}'.format(i))
         
