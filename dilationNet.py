@@ -27,22 +27,24 @@ x_test /= 255
 y_train = to_categorical(y_train, 10)
 y_test = to_categorical(y_test, 10)
 
-def DenseBlock(x,no_layers,nb_filters,stage):
+def DenseBlock(x,no_layers,nb_filters,stage,grow_rt):
     concat_layers = [x]
     for i in range(0,no_layers):
-        conv_b = ConvBlock(x,name_lyr='concat'+str(np.random.random_integers(0,1000000,1)[0]),nb_filters=nb_filters)
-        concat_layers.append(conv_b)
+        conv_b = ConvBlock(x,name_lyr='concat'+str(stage)+str(np.random.random_integers(0,1000000,1)[0]),nb_filters=nb_filters)
+        x = concatenate([x, conv_b])
+        nb_filters += grow_rt
         print('Adding denselayer {}'.format(i))
         
-    return concat_layers
+    return x, nb_filters
 
 
 def transitionLayer(x,nb_filters):
     x = BatchNormalization(epsilon = 1.1e-5)(x)
-    x = Conv2D(int(nb_filters * 0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',bias=False)(x)
+    x = Conv2D(int(nb_filters * 0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False)(x)
     x = Dropout(p=0.2)(x)
-    out = AveragePooling2D((2,2),strides=2)(x)
-    return out
+    x = Activation('relu')(x)
+    x = AveragePooling2D((2,2),strides=2)(x)
+    return x
 
 def ConvBlock(x,name_lyr,nb_filters):
     x = BatchNormalization()(x)
@@ -50,33 +52,27 @@ def ConvBlock(x,name_lyr,nb_filters):
     x = Dropout(p=0.2)(x)
     x = BatchNormalization()(x)
     #x = ZeroPadding2D((1, 1))(x)
-    out = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
-    return out
+    x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
+    return x
 
-nb_filters = 32
-grow_rt = 24
+nb_filters = 24
+grow_rt = 12
 inputs = Input(shape=x_train.shape[1:])
 
-x = ZeroPadding2D((4, 4), name='conv1_zeropadding')(inputs)
-x = Conv2D(int(grow_rt*2),(3,3),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
+x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
+x = Conv2D(int(nb_filters),(3,3),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
 # x = BatchNormalization()(x)
 # x = MaxPooling2D((2,2),strides=2)(x)
 
-nb_filters+=grow_rt
-dense_lst = DenseBlock(x,no_layers=6,stage=1,nb_filters=nb_filters)
-x = concatenate(dense_lst)
+x, nb_filters = DenseBlock(x,no_layers=16,stage=1,nb_filters=nb_filters,grow_rt=grow_rt)
 x = Dropout(p=0.2)(x)
 x = transitionLayer(x,nb_filters=nb_filters)
 
-nb_filters+=grow_rt
-dense_lst2 = DenseBlock(x,no_layers=6,stage=2,nb_filters=nb_filters)
-x = concatenate(dense_lst2)
+x, nb_filters = DenseBlock(x,no_layers=16,stage=2,nb_filters=nb_filters,grow_rt=grow_rt)
 x = Dropout(p=0.2)(x)
 x = transitionLayer(x,nb_filters=nb_filters)
 
-nb_filters+=grow_rt
-dense_lst3 = DenseBlock(x,no_layers=6,stage=3,nb_filters=nb_filters)
-x = concatenate(dense_lst3)
+x, nb_filters = DenseBlock(x,no_layers=16,stage=3,nb_filters=nb_filters,grow_rt=grow_rt)
 x = Dropout(p=0.2)(x)
 
 x = BatchNormalization(epsilon=1.1e-5)(x)
@@ -113,7 +109,7 @@ epochs=400
 #         vertical_flip=False)  # randomly flip images
 
 model.fit(x_train, y_train,
-                         batch_size=128,
+                         batch_size=64,
                         epochs=epochs,
                         validation_data=(x_test, y_test),callbacks=[reduce_lr])
 
