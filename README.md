@@ -2,7 +2,7 @@
 
 An implementation of the DenseNet bottleneck architecture with growth rate = 12.
 
-3 dense blocks each with 16 layers giving rise to a 2.5M parameter network. Trained on CIFAR10 without data augmentation results in:
+40-layer denseNet-BC like architecture. Trained on CIFAR10 without data augmentation:
 
 ```train accuracy x```
 
@@ -10,3 +10,6 @@ An implementation of the DenseNet bottleneck architecture with growth rate = 12.
 
 With (2x) dilated convolutions, validation accuracy improves to:
 
+```train accuracy x```
+
+```validation accuracy y```
