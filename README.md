@@ -4,9 +4,9 @@ An implementation of the DenseNet bottleneck architecture with growth rate = 12.
 
 40-layer denseNet-BC like architecture. Trained on CIFAR10 without data augmentation:
 
-```train accuracy x```
+```train accuracy 91%```
 
-```validation accuracy y```
+```validation accuracy 87%```
 
 With (2x) dilated convolutions, validation accuracy improves to:
 
