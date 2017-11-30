@@ -55,12 +55,12 @@ def ConvBlock(x,name_lyr,nb_filters):
     x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
     return x
 
-nb_filters = 24
+nb_filters = 12
 grow_rt = 12
 inputs = Input(shape=x_train.shape[1:])
 
 x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
-x = Conv2D(int(nb_filters),(3,3),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
+x = Conv2D(int(nb_filters*2),(3,3),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
 # x = BatchNormalization()(x)
 # x = MaxPooling2D((2,2),strides=2)(x)
 
@@ -111,7 +111,7 @@ epochs=400
 #         vertical_flip=False)  # randomly flip images
 
 model.fit(x_train, y_train,
-                         batch_size=64,
+                         batch_size=32,
                         epochs=epochs,
                         validation_data=(x_test, y_test),callbacks=[reduce_lr])
 
