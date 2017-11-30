@@ -40,7 +40,7 @@ def DenseBlock(x,no_layers,nb_filters,stage,grow_rt):
 
 def transitionLayer(x,nb_filters):
     x = BatchNormalization(epsilon = 1.1e-5)(x)
-    x = Conv2D(int(nb_filters * 0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False)(x)
+    x = Conv2D(int(12 * 0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False)(x)
     x = Dropout(p=0.2)(x)
     x = Activation('relu')(x)
     x = AveragePooling2D((2,2),strides=2)(x)
@@ -48,7 +48,7 @@ def transitionLayer(x,nb_filters):
 
 def ConvBlock(x,name_lyr,nb_filters):
     x = BatchNormalization()(x)
-    x = Conv2D(int(nb_filters*0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
+    x = Conv2D(int(12*0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
     x = Dropout(p=0.2)(x)
     x = BatchNormalization()(x)
     #x = ZeroPadding2D((1, 1))(x)
@@ -67,10 +67,12 @@ x = Conv2D(int(nb_filters),(3,3),padding='same', dilation_rate = 1,name='init_co
 x, nb_filters = DenseBlock(x,no_layers=16,stage=1,nb_filters=nb_filters,grow_rt=grow_rt)
 x = Dropout(p=0.2)(x)
 x = transitionLayer(x,nb_filters=nb_filters)
+nb_filters = int(nb_filters * 0.5)
 
 x, nb_filters = DenseBlock(x,no_layers=16,stage=2,nb_filters=nb_filters,grow_rt=grow_rt)
 x = Dropout(p=0.2)(x)
 x = transitionLayer(x,nb_filters=nb_filters)
+nb_filters = int(nb_filters * 0.5)
 
 x, nb_filters = DenseBlock(x,no_layers=16,stage=3,nb_filters=nb_filters,grow_rt=grow_rt)
 x = Dropout(p=0.2)(x)
