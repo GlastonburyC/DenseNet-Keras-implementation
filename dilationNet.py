@@ -53,12 +53,12 @@ def ConvBlock(x,name_lyr,nb_filters):
     out = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
     return out
 
-nb_filters = 16
-grow_rt = 12
+nb_filters = 32
+grow_rt = 24
 inputs = Input(shape=x_train.shape[1:])
 
-x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
-x = Conv2D(int(nb_filters*4),(3,3),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
+x = ZeroPadding2D((4, 4), name='conv1_zeropadding')(inputs)
+x = Conv2D(int(grow_rt*2),(3,3),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
 # x = BatchNormalization()(x)
 # x = MaxPooling2D((2,2),strides=2)(x)
 
@@ -76,8 +76,8 @@ x = transitionLayer(x,nb_filters=nb_filters)
 
 nb_filters+=grow_rt
 dense_lst3 = DenseBlock(x,no_layers=6,stage=3,nb_filters=nb_filters)
-x = Dropout(p=0.2)(x)
 x = concatenate(dense_lst3)
+x = Dropout(p=0.2)(x)
 
 x = BatchNormalization(epsilon=1.1e-5)(x)
 x = Activation('relu')(x)
