@@ -58,7 +58,7 @@ grow_rt = 12
 inputs = Input(shape=x_train.shape[1:])
 
 x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
-x = Conv2D(int(grow_rt*2),(3,3),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
+x = Conv2D(int(nb_filters*4),(3,3),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
 # x = BatchNormalization()(x)
 # x = MaxPooling2D((2,2),strides=2)(x)
 
