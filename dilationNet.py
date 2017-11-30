@@ -1,5 +1,5 @@
 from keras.layers import Conv2D, BatchNormalization, Dense, Dropout, merge, ZeroPadding2D
-from keras.layers import concatenate, GlobalAveragePooling2D,MaxPooling2D, Input, Flatten,AveragePooling2D
+from keras.layers import Concatenate, GlobalAveragePooling2D,MaxPooling2D, Input, Flatten,AveragePooling2D
 from keras.activations import relu
 from keras import losses
 from keras.models import Model
@@ -26,6 +26,8 @@ x_test /= 255
 
 y_train = to_categorical(y_train, 10)
 y_test = to_categorical(y_test, 10)
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = '2'
 
 def DenseBlock(x,no_layers,nb_filters,stage,grow_rt):
     concat_layers = [x]
@@ -41,7 +43,7 @@ def DenseBlock(x,no_layers,nb_filters,stage,grow_rt):
 
 def transitionLayer(x,nb_filters):
     x = BatchNormalization(epsilon = 1.1e-5)(x)
-    x = Conv2D(int(12 * 0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False)(x)
+    x = Conv2D(int(12 * 0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_normal',use_bias=False)(x)
     x = Dropout(p=0.2)(x)
     x = Activation('relu')(x)
     x = AveragePooling2D((2,2),strides=2)(x)
@@ -49,11 +51,11 @@ def transitionLayer(x,nb_filters):
 
 def ConvBlock(x,name_lyr,nb_filters):
     x = BatchNormalization()(x)
-    x = Conv2D(int(12*0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
+    x = Conv2D(int(12*0.5),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_normal',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
     x = Dropout(p=0.2)(x)
     x = BatchNormalization()(x)
     #x = ZeroPadding2D((1, 1))(x)
-    x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
+    x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_normal',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
     return x
 
 nb_filters = 12
@@ -61,7 +63,7 @@ grow_rt = 12
 inputs = Input(shape=x_train.shape[1:])
 
 x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(inputs)
-x = Conv2D(16,(3,3),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
+x = Conv2D(16,(3,3),padding='same', dilation_rate = 1,name='init_conv',kernel_initializer='he_normal',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
 # x = BatchNormalization()(x)
 # x = MaxPooling2D((2,2),strides=2)(x)
 
