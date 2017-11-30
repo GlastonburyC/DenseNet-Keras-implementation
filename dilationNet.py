@@ -90,10 +90,10 @@ model = Model(inputs=inputs, outputs=predictions)
 model.summary()
 
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5,
-                              patience=5, min_lr=0.0001)
+                              patience=20, min_lr=0.00001)
 
 
-opt =  Adam(lr=1e-2)
+opt =  Adam(lr=0.1)
 model.compile(optimizer=opt,
               loss='categorical_crossentropy',
               metrics=['accuracy'])
