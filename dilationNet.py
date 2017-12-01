@@ -47,24 +47,26 @@ def DenseBlock(x,no_layers,nb_filters,grow_rt):
 
 
 def transitionLayer(x,nb_filters):
-    x = BatchNormalization(epsilon = 1.1e-5)(x)
-    x = Conv2D(nb_filters,(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False)(x)
+    x = BatchNormalization(gamma_regularizer=l2(weight_decay),
+                           beta_regularizer=l2(weight_decay))(x)
+    x = Conv2D(nb_filters,(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False,kernel_regularizer=l2(weight_decay))(x)
     x = Dropout(p=0.2)(x)
     x = AveragePooling2D((2,2),strides=(2, 2))(x)
     return x
 
 def ConvBlock(x,nb_filters):
-    x = BatchNormalization()(x)
-    x = Conv2D(int(nb_filters),(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(x)
+    x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x)
+    x = Conv2D(int(nb_filters),(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',kernel_regularizer=l2(weight_decay),use_bias=False)(x)
     x = Dropout(p=0.2)(x)
     return x
 
 nb_filters=16
 grow_rt=12
+weight_decay = 1E-4
 
 inputs = Input(shape=X_train.shape[1:])
 
-x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',W_regularizer=l2(1E-4),use_bias=False)(inputs)
+x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',kernel_regularizer=l2(weight_decay),use_bias=False)(inputs)
 
 x, nb_filters = DenseBlock(x,no_layers=12,nb_filters=nb_filters,grow_rt=grow_rt)
 x = transitionLayer(x,nb_filters=nb_filters)
@@ -73,7 +75,7 @@ x, nb_filters = DenseBlock(x,no_layers=12,nb_filters=nb_filters,grow_rt=grow_rt)
 x = transitionLayer(x,nb_filters=nb_filters)
 
 x, nb_filters = DenseBlock(x,no_layers=12,nb_filters=nb_filters,grow_rt=grow_rt)
-x = BatchNormalization(epsilon=1.1e-5)(x)
+x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x)
 x = Activation('relu')(x)
 x = GlobalAveragePooling2D()(x)
 
