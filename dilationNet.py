@@ -46,35 +46,45 @@ def DenseBlock(x,no_layers,nb_filters,grow_rt):
     return x, nb_filters
 
 
-def transitionLayer(x,nb_filters):
+def transitionLayer(x,nb_filters,compression):
     x = BatchNormalization(gamma_regularizer=l2(weight_decay),
                            beta_regularizer=l2(weight_decay))(x)
-    x = Conv2D(nb_filters,(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False,kernel_regularizer=l2(weight_decay))(x)
-    x = Dropout(p=0.2)(x)
+    inter_ch = int(nb_filters*compression)
+    x = Conv2D(int(inter_ch),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False,kernel_regularizer=l2(weight_decay))(x)
+    x = Dropout(rate=0.2)(x)
     x = AveragePooling2D((2,2),strides=(2, 2))(x)
     return x
 
 def ConvBlock(x,nb_filters):
+    inter_ch = int(nb_filters*4)
+    x = Conv2D(int(inter_ch), (1, 1), kernel_initializer='he_uniform', padding='same', use_bias=False,
+                   kernel_regularizer=l2(weight_decay))(x)
     x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x)
-    x = Conv2D(int(nb_filters),(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',kernel_regularizer=l2(weight_decay),use_bias=False)(x)
-    x = Dropout(p=0.2)(x)
+    x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',kernel_regularizer=l2(weight_decay),use_bias=False)(x)
+    x = Dropout(rate=0.2)(x)
     return x
 
-nb_filters=16
+nb_filters=24
 grow_rt=12
 weight_decay = 1E-4
+compression = 0.5
+depth = 100
+no_layers = int(((depth-4)/3)/2)
+
 
 inputs = Input(shape=X_train.shape[1:])
 
 x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',kernel_regularizer=l2(weight_decay),use_bias=False)(inputs)
 
-x, nb_filters = DenseBlock(x,no_layers=12,nb_filters=nb_filters,grow_rt=grow_rt)
-x = transitionLayer(x,nb_filters=nb_filters)
+x, nb_filters = DenseBlock(x,no_layers=no_layers,nb_filters=nb_filters,grow_rt=grow_rt)
+x = transitionLayer(x,nb_filters=nb_filters,compression=compression)
+nb_filters = int(nb_filters * compression)
 
-x, nb_filters = DenseBlock(x,no_layers=12,nb_filters=nb_filters,grow_rt=grow_rt)
-x = transitionLayer(x,nb_filters=nb_filters)
+x, nb_filters = DenseBlock(x,no_layers=no_layers,nb_filters=nb_filters,grow_rt=grow_rt)
+x = transitionLayer(x,nb_filters=nb_filters,compression=compression)
+nb_filters = int(nb_filters * compression)
 
-x, nb_filters = DenseBlock(x,no_layers=12,nb_filters=nb_filters,grow_rt=grow_rt)
+x, nb_filters = DenseBlock(x,no_layers=no_layers,nb_filters=nb_filters,grow_rt=grow_rt)
 x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x)
 x = Activation('relu')(x)
 x = GlobalAveragePooling2D()(x)
