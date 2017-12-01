@@ -37,7 +37,7 @@ for i in range(3):
 def DenseBlock(x,no_layers,nb_filters,grow_rt):
     concat_layers = [x]
     for i in range(no_layers):
-        conv_b = ConvBlock(x,nb_filters=grow_rt)
+        conv_b = ConvBlock(x,grow_rt)
         concat_layers.append(conv_b)
         x = Concatenate(axis=-1)(concat_layers)
         nb_filters += grow_rt
