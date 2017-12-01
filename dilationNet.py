@@ -89,7 +89,7 @@ x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(we
 x = Activation('relu')(x)
 x = GlobalAveragePooling2D()(x)
 
-x = Dense(10, activation='softmax')(x)
+x = Dense(10, activation='softmax',kernel_regularizer=l2(weight_decay),bias_regularizer=l2(weight_decay))(x)
 
 model = Model(inputs=inputs, outputs=[x])
 
