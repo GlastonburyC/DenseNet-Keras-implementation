@@ -8,7 +8,7 @@ from keras.regularizers import l2
 import keras
 import sys, wget
 import tarfile
-import os
+import os, math
 os.environ["CUDA_VISIBLE_DEVICES"] = '2'
 
 from keras.datasets import cifar10
@@ -17,7 +17,7 @@ from keras.optimizers import Adam, SGD,RMSprop
 from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
-from keras.callbacks import ReduceLROnPlateau
+from keras.callbacks import ReduceLROnPlateau, LearningRateScheduler
 # load in the CIFAR10 dataset
 (X_train, Y_train), (X_test, Y_test) = cifar10.load_data()
 
@@ -49,6 +49,7 @@ def DenseBlock(x,no_layers,nb_filters,grow_rt):
 def transitionLayer(x,nb_filters):
     x = BatchNormalization(gamma_regularizer=l2(weight_decay),
                            beta_regularizer=l2(weight_decay))(x)
+    x = Activation('relu')(x)
     x = Conv2D(nb_filters,(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False,kernel_regularizer=l2(weight_decay))(x)
     x = Dropout(p=0.2)(x)
     x = AveragePooling2D((2,2),strides=(2, 2))(x)
@@ -56,11 +57,12 @@ def transitionLayer(x,nb_filters):
 
 def ConvBlock(x,nb_filters):
     x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x)
-    x = Conv2D(int(nb_filters),(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',kernel_regularizer=l2(weight_decay),use_bias=False)(x)
+    x = Activation('relu')(x)
+    x = Conv2D(int(nb_filters),(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False)(x)
     x = Dropout(p=0.2)(x)
     return x
 
-nb_filters=16
+nb_filters=64
 grow_rt=12
 weight_decay = 1E-4
 
@@ -79,14 +81,21 @@ x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(we
 x = Activation('relu')(x)
 x = GlobalAveragePooling2D()(x)
 
-x = Dense(10, activation='softmax')(x)
+x = Dense(10, activation='softmax',kernel_regularizer=l2(weight_decay),bias_regularizer=l2(weight_decay))(x)
 
 model = Model(inputs=inputs, outputs=[x])
 
 model.summary()
 
-reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5,
-                              patience=20, min_lr=0.00001)
+def step_decay(epoch):
+   initial_lrate = 0.1
+   drop = 0.5
+   epochs_drop = 150
+   lrate = initial_lrate * math.pow(drop,  
+           math.floor((1+epoch)/epochs_drop))
+   return lrate
+
+lrate = LearningRateScheduler(step_decay)
 
 
 opt =  Adam(lr=0.1)
@@ -111,7 +120,7 @@ epochs=400
 model.fit(X_train, Y_train,
                          batch_size=64,
                         epochs=epochs,
-                        validation_data=(X_test, Y_test),callbacks=[reduce_lr])
+                        validation_data=(X_test, Y_test),callbacks=[lrate])
 
 # model.fit_generator(datagen.flow(x_train, y_train,
 #                                      batch_size=128),
