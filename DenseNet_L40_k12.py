@@ -88,6 +88,7 @@ model = Model(inputs=inputs, outputs=[x])
 model.summary()
 
 def step_decay(epoch):
+   lrate = 0
    initial_lrate = 0.1
    drop = 0.5
    if epoch == 150:
