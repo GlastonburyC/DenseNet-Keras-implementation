@@ -62,7 +62,7 @@ def ConvBlock(x,nb_filters):
     x = Dropout(p=0.2)(x)
     return x
 
-nb_filters=64
+nb_filters=16
 grow_rt=12
 weight_decay = 1E-4
 
@@ -90,9 +90,10 @@ model.summary()
 def step_decay(epoch):
    initial_lrate = 0.1
    drop = 0.5
-   epochs_drop = 150
-   lrate = initial_lrate * math.pow(drop,  
-           math.floor((1+epoch)/epochs_drop))
+   if epoch == 150:
+        lrate = initial_lrate / 10
+   if epoch == 225:
+    lrate = initial_lrate / 100
    return lrate
 
 lrate = LearningRateScheduler(step_decay)
@@ -103,7 +104,7 @@ model.compile(optimizer=opt,
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-epochs=400
+epochs=300
 
 # datagen = ImageDataGenerator(
 #         featurewise_center=False,  # set input mean to 0 over the dataset
