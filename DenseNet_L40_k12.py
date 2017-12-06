@@ -40,9 +40,7 @@ def DenseBlock(x,no_layers,nb_filters,grow_rt):
         conv_b = ConvBlock(x,grow_rt)
         concat_layers.append(conv_b)
         x = Concatenate(axis=-1)(concat_layers)
-        nb_filters += grow_rt
-        print('Adding denselayer {}'.format(i))
-        
+        nb_filters += grow_rt        
     return x, nb_filters
 
 
@@ -50,7 +48,7 @@ def transitionLayer(x,nb_filters):
     x = BatchNormalization(gamma_regularizer=l2(weight_decay),
                            beta_regularizer=l2(weight_decay))(x)
     x = Activation('relu')(x)
-    x = Conv2D(nb_filters,(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False,kernel_regularizer=l2(weight_decay))(x)
+    x = Conv2D(nb_filters,(1,1),padding='same',dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False,kernel_regularizer=l2(weight_decay))(x)
     x = Dropout(p=0.2)(x)
     x = AveragePooling2D((2,2),strides=(2, 2))(x)
     return x
@@ -68,7 +66,7 @@ weight_decay = 1E-4
 
 inputs = Input(shape=X_train.shape[1:])
 
-x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',kernel_regularizer=l2(weight_decay),use_bias=False)(inputs)
+x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False,name="initial_conv2D")(inputs)
 
 x, nb_filters = DenseBlock(x,no_layers=12,nb_filters=nb_filters,grow_rt=grow_rt)
 x = transitionLayer(x,nb_filters=nb_filters)
@@ -102,7 +100,7 @@ def step_decay(epoch):
 lrate = LearningRateScheduler(step_decay)
 
 
-opt =  Adam(lr=0.1)
+opt =  SGD(lr=0.1,momentum=0.9)
 model.compile(optimizer=opt,
               loss='categorical_crossentropy',
               metrics=['accuracy'])
