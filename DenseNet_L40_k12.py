@@ -88,15 +88,16 @@ model = Model(inputs=inputs, outputs=[x])
 model.summary()
 
 def step_decay(epoch):
-   if epoch < 150: 
-    lrate = 0.1
-   initial_lrate = 0.1
-   drop = 0.5
-   if epoch == 150:
+    initial_lrate = 0.1
+    if epoch < 150: 
+        lrate = 0.1
+    if epoch == 150:
         lrate = initial_lrate / 10
-   if epoch == 225:
-    lrate = initial_lrate / 100
-   return float(lrate)
+    if epoch > 150 and epoch < 225:
+        lrate = initial_lrate / 10 
+    if epoch >= 225:
+        lrate = initial_lrate / 100
+    return float(lrate)
 
 lrate = LearningRateScheduler(step_decay)
 
