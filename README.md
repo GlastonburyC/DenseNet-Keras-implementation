@@ -8,7 +8,7 @@ Trained on CIFAR10 without data augmentation:
 
 Using following opt parameters for 300 epochs `(SGD - initial_lr = 0.1, momentum=0.90)`
 
-`
+~~~~
 def step_decay(epoch):
     initial_lrate = 0.1
     if epoch < 150: 
@@ -20,7 +20,7 @@ def step_decay(epoch):
     if epoch >= 225:
         lrate = initial_lrate / 100
     return float(lrate)
-    `
+~~~~
 
 With (2x) dilated convolutions, validation accuracy improves to:
 
