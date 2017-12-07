@@ -67,6 +67,9 @@ weight_decay = 1E-4
 inputs = Input(shape=X_train.shape[1:])
 
 x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1, kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False,name="initial_conv2D")(inputs)
+x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x)
+x = Activation('relu')(x)
+x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 2, kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False,name="initial2_conv2D")(x)
 
 x, nb_filters = DenseBlock(x,no_layers=12,nb_filters=nb_filters,grow_rt=grow_rt)
 x = transitionLayer(x,nb_filters=nb_filters)
