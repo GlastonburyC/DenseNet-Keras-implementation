@@ -1,4 +1,4 @@
-# DenseNet-like architecture in Keras
+# DenseNet architecture implementation in Keras
 
 An implementation of the DenseNet architecture with growth rate = 12, Layers =40.
 
