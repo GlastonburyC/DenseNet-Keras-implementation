@@ -1,6 +1,6 @@
 # DenseNet architecture implementation in Keras
 
-An implementation of the DenseNet architecture with growth rate = 12, Layers =40.
+An implementation of the DenseNet architecture with growth rate = 12, Layers = 40.
 
 Trained on CIFAR10 without data augmentation:
 
