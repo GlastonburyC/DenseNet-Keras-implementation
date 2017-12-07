@@ -4,9 +4,9 @@ An implementation of the DenseNet architecture with growth rate = 12, Layers =40
 
 Trained on CIFAR10 without data augmentation:
 
-```validation error rate 6.37%```
+```python validation error rate 6.37%```
 
-Using following opt parameters for 300 epochs ```(SGD - initial_lr = 0.1, momentum=0.90)```
+Using following opt parameters for 300 epochs ```python (SGD - initial_lr = 0.1, momentum=0.90)```
 
 ~~~~python
 def step_decay(epoch):
@@ -24,4 +24,4 @@ def step_decay(epoch):
 
 With (2x) dilated convolutions, validation accuracy improves to:
 
-```validation error rate y```
+```python validation error rate y```
