@@ -1,3 +1,7 @@
+import numpy as np
+
+np.random.seed(42)
+
 from keras.layers import Conv2D, BatchNormalization, Dense, Dropout, merge, ZeroPadding2D
 from keras.layers import Concatenate, GlobalAveragePooling2D,MaxPooling2D, Input, Flatten,AveragePooling2D
 from keras.activations import relu
@@ -16,7 +20,6 @@ from keras.optimizers import Adam, SGD,RMSprop
 
 from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator
-import numpy as np
 from keras.callbacks import ReduceLROnPlateau, LearningRateScheduler
 # load in the CIFAR10 dataset
 (X_train, Y_train), (X_test, Y_test) = cifar10.load_data()
@@ -48,7 +51,7 @@ def transitionLayer(x,nb_filters):
     x = BatchNormalization(gamma_regularizer=l2(weight_decay),
                            beta_regularizer=l2(weight_decay))(x)
     x = Activation('relu')(x)
-    x = Conv2D(nb_filters,(1,1),padding='same',dilation_rate = 2,kernel_initializer='he_uniform',use_bias=False,kernel_regularizer=l2(weight_decay))(x)
+    x = Conv2D(nb_filters,(1,1),padding='same',dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False,kernel_regularizer=l2(weight_decay))(x)
     x = Dropout(p=0.2)(x)
     x = AveragePooling2D((2,2),strides=(2, 2))(x)
     return x
@@ -56,7 +59,7 @@ def transitionLayer(x,nb_filters):
 def ConvBlock(x,nb_filters):
     x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x)
     x = Activation('relu')(x)
-    x = Conv2D(int(nb_filters),(3,3),padding='same', dilation_rate = 2,kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False)(x)
+    x = Conv2D(int(nb_filters),(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False)(x)
     x = Dropout(p=0.2)(x)
     return x
 
@@ -66,10 +69,18 @@ weight_decay = 1E-4
 
 inputs = Input(shape=X_train.shape[1:])
 
-x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1, kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False,name="initial_conv2D")(inputs)
-x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x)
-x = Activation('relu')(x)
-x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 2, kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False,name="initial2_conv2D")(x)
+x1 = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1, kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False)(inputs)
+x2 = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x1)
+x3 = Activation('relu')(x2)
+x4 = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 2, kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False)(x3)
+x5 = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x4)
+x6 = Activation('relu')(x5)
+
+x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 3, kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False)(x6)
+
+dilated_concat=[x,x1,x2,x3,x4,x5,x6]
+
+x = Concatenate(axis=-1)(dilated_concat)
 
 x, nb_filters = DenseBlock(x,no_layers=12,nb_filters=nb_filters,grow_rt=grow_rt)
 x = transitionLayer(x,nb_filters=nb_filters)
