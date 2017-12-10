@@ -78,7 +78,7 @@ x6 = Activation('relu')(x5)
 
 x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 3, kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False)(x6)
 
-dilated_concat=[x1,x2,x3,x4,x5,x6,x]
+dilated_concat=[x,x1,x2,x3,x4,x5,x6]
 
 x = Concatenate(axis=-1)(dilated_concat)
 
