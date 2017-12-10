@@ -1,3 +1,7 @@
+import numpy as np
+
+np.random.seed(42)
+
 from keras.layers import Conv2D, BatchNormalization, Dense, Dropout, merge, ZeroPadding2D
 from keras.layers import Concatenate, GlobalAveragePooling2D,MaxPooling2D, Input, Flatten,AveragePooling2D
 from keras.activations import relu
@@ -16,7 +20,6 @@ from keras.optimizers import Adam, SGD,RMSprop
 
 from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator
-import numpy as np
 from keras.callbacks import ReduceLROnPlateau, LearningRateScheduler
 # load in the CIFAR10 dataset
 (X_train, Y_train), (X_test, Y_test) = cifar10.load_data()
@@ -87,14 +90,16 @@ model.summary()
 
 def step_decay(epoch):
     initial_lrate = 0.1
-    if epoch < 150: 
-        lrate = 0.1
-    if epoch == 150:
+    if epoch == 50:
         lrate = initial_lrate / 10
-    if epoch > 150 and epoch < 225:
-        lrate = initial_lrate / 10 
-    if epoch >= 225:
+    if epoch > 50 and <= 150: 
+        lrate = initial_lrate / 10
+    if epoch == 150:
         lrate = initial_lrate / 100
+    if epoch > 150 and epoch < 225:
+        lrate = initial_lrate / 100 
+    if epoch >= 225:
+        lrate = initial_lrate / 1000
     return float(lrate)
 
 lrate = LearningRateScheduler(step_decay)
