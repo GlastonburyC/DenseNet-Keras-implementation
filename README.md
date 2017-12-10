@@ -1,4 +1,4 @@
-# DenseNet architecture implementation in Keras
+# DenseNet and DenseNet-BC architecture implementation in Keras
 
 An implementation of the DenseNet architecture with growth rate = 12, Layers = 40.
 
@@ -22,6 +22,6 @@ def step_decay(epoch):
     return float(lrate)
 ~~~~
 
-With (2x) dilated convolutions, validation accuracy improves to:
+DenseNet-BC growth rate 12, inital conv filters 24, depth = 100. (~800k parameters)
 
 ```python validation error rate y```
