@@ -1,3 +1,7 @@
+import numpy as np
+
+np.random.seed(42)
+
 from keras.layers import Conv2D, BatchNormalization, Dense, Dropout, merge, ZeroPadding2D
 from keras.layers import Concatenate, GlobalAveragePooling2D,MaxPooling2D, Input, Flatten,AveragePooling2D
 from keras.activations import relu
@@ -16,7 +20,6 @@ from keras.optimizers import Adam, SGD,RMSprop
 
 from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator
-import numpy as np
 from keras.callbacks import ReduceLROnPlateau
 # load in the CIFAR10 dataset
 (X_train, Y_train), (X_test, Y_test) = cifar10.load_data()
@@ -50,6 +53,7 @@ def transitionLayer(x,nb_filters,compression):
     x = BatchNormalization(gamma_regularizer=l2(weight_decay),
                            beta_regularizer=l2(weight_decay))(x)
     inter_ch = int(nb_filters*compression)
+    x = Activation('relu')(x)
     x = Conv2D(int(inter_ch),(1,1),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',use_bias=False,kernel_regularizer=l2(weight_decay))(x)
     x = Dropout(rate=0.2)(x)
     x = AveragePooling2D((2,2),strides=(2, 2))(x)
@@ -57,10 +61,13 @@ def transitionLayer(x,nb_filters,compression):
 
 def ConvBlock(x,nb_filters):
     inter_ch = int(nb_filters*4)
+    x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x)
+    x = Activation('relu')(x)
     x = Conv2D(int(inter_ch), (1, 1), kernel_initializer='he_uniform', padding='same', use_bias=False,
                    kernel_regularizer=l2(weight_decay))(x)
     x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x)
-    x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',kernel_regularizer=l2(weight_decay),use_bias=False)(x)
+    x = Activation('relu')(x)
+    x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False)(x)
     x = Dropout(rate=0.2)(x)
     return x
 
@@ -74,7 +81,7 @@ no_layers = int(((depth-4)/3)/2)
 
 inputs = Input(shape=X_train.shape[1:])
 
-x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',activation = 'relu',kernel_regularizer=l2(weight_decay),use_bias=False)(inputs)
+x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = 1,kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False)(inputs)
 
 x, nb_filters = DenseBlock(x,no_layers=no_layers,nb_filters=nb_filters,grow_rt=grow_rt)
 x = transitionLayer(x,nb_filters=nb_filters,compression=compression)
