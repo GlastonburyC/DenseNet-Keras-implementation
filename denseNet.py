@@ -13,7 +13,7 @@ import keras
 import sys, wget
 import tarfile
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '2'
+os.environ["CUDA_VISIBLE_DEVICES"] = '3'
 
 from keras.datasets import cifar10
 from keras.optimizers import Adam, SGD,RMSprop
