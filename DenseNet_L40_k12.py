@@ -90,13 +90,9 @@ model.summary()
 
 def step_decay(epoch):
     initial_lrate = 0.1
-    if epoch == 50:
+    if epoch >= 50 and epoch < 150: 
         lrate = initial_lrate / 10
-    if epoch > 50 and <= 150: 
-        lrate = initial_lrate / 10
-    if epoch == 150:
-        lrate = initial_lrate / 100
-    if epoch > 150 and epoch < 225:
+    if epoch >= 150 and epoch < 225:
         lrate = initial_lrate / 100 
     if epoch >= 225:
         lrate = initial_lrate / 1000
