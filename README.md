@@ -22,6 +22,11 @@ def step_decay(epoch):
     return float(lrate)
 ~~~~
 
+DenseNet as above but with concatenated initial dilations:
+
+```Validation error rate: 6.44%```
+
+
 DenseNet-BC growth rate 12, inital conv filters 24, depth = 100. (~800k parameters)
 
-```python validation error rate y```
+```Validation error rate y```
