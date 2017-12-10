@@ -13,14 +13,14 @@ import keras
 import sys, wget
 import tarfile
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '3'
+os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 from keras.datasets import cifar10
 from keras.optimizers import Adam, SGD,RMSprop
 
 from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import ReduceLROnPlateau
+from keras.callbacks import ReduceLROnPlateau,LearningRateScheduler
 # load in the CIFAR10 dataset
 (X_train, Y_train), (X_test, Y_test) = cifar10.load_data()
 
@@ -102,16 +102,26 @@ model = Model(inputs=inputs, outputs=[x])
 
 model.summary()
 
-reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5,
-                              patience=20, min_lr=0.00001)
+def step_decay(epoch):
+    initial_lrate = 0.1
+    if epoch < 150: 
+        lrate = 0.1
+    if epoch == 150:
+        lrate = initial_lrate / 10
+    if epoch > 150 and epoch < 225:
+        lrate = initial_lrate / 10 
+    if epoch >= 225:
+        lrate = initial_lrate / 100
+    return float(lrate)
 
+lrate = LearningRateScheduler(step_decay)
 
-opt =  Adam(lr=0.1)
+opt =  SGD(lr=0.1,momentum=0.9)
 model.compile(optimizer=opt,
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-epochs=400
+epochs=300
 
 # datagen = ImageDataGenerator(
 #         featurewise_center=False,  # set input mean to 0 over the dataset
@@ -128,11 +138,4 @@ epochs=400
 model.fit(X_train, Y_train,
                          batch_size=64,
                         epochs=epochs,
-                        validation_data=(X_test, Y_test),callbacks=[reduce_lr])
-
-# model.fit_generator(datagen.flow(x_train, y_train,
-#                                      batch_size=128),
-#                         steps_per_epoch=int(np.ceil(x_train.shape[0] / float(128))),
-#                         epochs=epochs,
-#                         validation_data=(x_test, y_test),
-#                         workers=8)
+                        validation_data=(X_test, Y_test),callbacks=[lrate])
