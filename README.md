@@ -6,7 +6,7 @@ An implementation of the DenseNet architecture with growth rate = 12, L = 40 (~1
 
 Trained on CIFAR10 without data augmentation:
 
-```validation error rate 6.37%```
+```validation error rate 6.22%```
 
 Using following opt parameters for 300 epochs ```(SGD - initial_lr = 0.1, momentum=0.90)```
 
