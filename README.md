@@ -1,4 +1,4 @@
-# DenseNet and DenseNet-BC architecture implementation in Keras
+# DenseNet and DenseNet-BC implementation in Keras
 
 All experiments without data augmentation and with set seed, 42.
 
