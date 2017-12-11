@@ -1,6 +1,8 @@
 # DenseNet and DenseNet-BC architecture implementation in Keras
 
-An implementation of the DenseNet architecture with growth rate = 12, Layers = 40.
+All experiments without data augmentation and with set seed, 42.
+
+An implementation of the DenseNet architecture with growth rate = 12, L = 40 (~1M parameters).
 
 Trained on CIFAR10 without data augmentation:
 
@@ -22,11 +24,11 @@ def step_decay(epoch):
     return float(lrate)
 ~~~~
 
-DenseNet as above but with concatenated initial dilations:
+DenseNet as above but with concatenated initial dilated convolutions (d=1,d=2 & d=3) (1.2M parameters):
 
 ```Validation error rate: 6.44%```
 
 
-DenseNet-BC growth rate 12, inital conv filters 24, depth = 100. (~800k parameters)
+DenseNet-BC growth rate 12, inital conv filters 24, L = 100. (~800k parameters)
 
 ```Validation error rate y```
