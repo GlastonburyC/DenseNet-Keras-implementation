@@ -26,4 +26,4 @@ def step_decay(epoch):
 
 DenseNet-BC growth rate 12, inital conv filters 24, L = 100. (~800k parameters)
 
-```Validation error rate y```
+```Validation error rate 5.44%```
