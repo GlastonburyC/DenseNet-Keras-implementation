@@ -33,14 +33,13 @@ I used the following learning schedule for 300 epochs ```(SGD - initial_lr = 0.1
 
 ~~~~python
 def step_decay(epoch):
-    initial_lrate = 0.1
-    if epoch < 150: 
-        lrate = 0.1
-    if epoch == 150:
-        lrate = initial_lrate / 10
-    if epoch > 150 and epoch < 225:
-        lrate = initial_lrate / 10 
-    if epoch >= 225:
-        lrate = initial_lrate / 100
-    return float(lrate)
+	initial_lrate = 0.1
+	lrate = 0.1
+	if epoch >= 50 and epoch < 150:
+		lrate = initial_lrate / 10
+	if epoch >= 150 and epoch < 225:
+		lrate = initial_lrate / 100
+	if epoch >= 225:
+		lrate = initial_lrate / 1000
+	return float(lrate)
 ~~~~
