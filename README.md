@@ -17,13 +17,13 @@ To implement Densenet with growth_rate = 12, Layers = 40:
 To reproduce my results - Just run:
 
 ~~~python 
-python3 densenet.py 300 12 12 16 10 0 3 1 0
+python densenet.py --upsample 1
 ~~~
 
 To implement Densenet-BC with Layers = 100, compression = 0.5:
 
 ~~~python 
-python3 densenet.py 300 16 12 24 10 False 0 0.5 0
+python densenet.py --upsample 1 --growth 12 --filters 24 --compression 0.5 --layers 16
 ~~~
 
 
