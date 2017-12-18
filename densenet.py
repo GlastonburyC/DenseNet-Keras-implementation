@@ -141,15 +141,18 @@ if __name__ == "__main__":
 	        featurewise_std_normalization=False,  # divide inputs by std of the dataset
 	        samplewise_std_normalization=False,  # divide each input by its std
 	        zca_whitening=False,  # apply ZCA whitening
-	        rotation_range=0,  # randomly rotate images in the range (degrees, 0 to 180)
-	        width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
-	        height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
+	        rotation_range=180,  # randomly rotate images in the range (degrees, 0 to 180)
+	        width_shift_range=0.2,  # randomly shift images horizontally (fraction of total width)
+	        height_shift_range=0.2,  # randomly shift images vertically (fraction of total height)
 	        horizontal_flip=True,  # randomly flip images
 	        vertical_flip=False)  # randomly flip images
-		model.fit(X_train, Y_train,
-	                         batch_size=64,
-	                        epochs=epochs,
-	                        validation_data=(X_test, Y_test),callbacks=[lrate])
+		InceptionV3_model.fit_generator(X_train, Y_train,
+                    steps_per_epoch = round(50000/batch_size),   #num_train_images // batch_size,
+                    epochs = epochs,
+                    validation_data=(X_test, Y_test),
+                    validation_steps = round(50000/batch_size),  #num_val_images // batch_size,
+                    workers = 16,
+                    callbacks = [lrate])
 	else:
 	    model.fit(X_train, Y_train,
 	                     batch_size=64,
