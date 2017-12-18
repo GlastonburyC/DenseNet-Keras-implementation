@@ -146,13 +146,11 @@ if __name__ == "__main__":
 	        height_shift_range=0.2,  # randomly shift images vertically (fraction of total height)
 	        horizontal_flip=True,  # randomly flip images
 	        vertical_flip=False)  # randomly flip images
-		model.fit_generator(X_train, Y_train,
-                    steps_per_epoch = round(50000/64),   #num_train_images // batch_size,
-                    epochs = epochs,
-                    validation_data=(X_test, Y_test),
-                    validation_steps = round(50000/64),  #num_val_images // batch_size,
-                    workers = 16,
-                    callbacks = [lrate])
+		model.fit_generator(datagen.flow(X_train, Y_train,
+                                     batch_size=64),
+                        epochs=epochs,
+                        validation_data=(X_test, Y_test),
+                        workers=4,callbacks=[lrate])
 	else:
 	    model.fit(X_train, Y_train,
 	                     batch_size=64,
