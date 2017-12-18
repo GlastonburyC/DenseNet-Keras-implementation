@@ -1,4 +1,4 @@
-# DenseNet and DenseNet-BC implementation in Keras
+# DenseNet and DenseNet-BC implementation in Keras (Tensorflow Backend)
 
 An implementation of the DenseNet architecture with growth rate = 12, L = 40 (~1M parameters).
 
