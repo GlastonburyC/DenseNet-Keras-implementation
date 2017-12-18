@@ -11,11 +11,11 @@ import numpy as np
 np.random.seed(42)
 
 from keras.layers import Conv2D, BatchNormalization, Dense, Dropout
-from keras.layers import merge, ZeroPadding2D
-from keras.layers import Concatenate, GlobalAveragePooling2D,MaxPooling2D
+from keras.layers import merge, ZeroPadding2D, UpSampling2D
+from keras.layers import Concatenate, GlobalAveragePooling2D,MaxPooling2D, concatenate
 from keras.layers import Input, Flatten,AveragePooling2D
 from keras.activations import relu
-from keras import lossses
+from keras import losses
 from keras.models import Model
 from keras.layers import Activation
 from keras.regularizers import l2
@@ -23,8 +23,8 @@ import keras
 import sys, wget
 import tarfile
 import os, math
-os.environ["CUDA_VISIBLE_DEVICES"] = '2'
 
+os.environ["CUDA_VISIBLE_DEVICES"] = '2'
 from keras.datasets import cifar10
 from keras.optimizers import Adam, SGD,RMSprop
 
@@ -111,30 +111,59 @@ class DenseNet():
 			nb_filters += grow_rt
 		return x, nb_filters
 
+	def Upsampling(self,x,no_layers,nb_filters,grow_rt,drop_rate,dilate_rate,weight_decay,compression):
+		x = BatchNormalization(gamma_regularizer=l2(weight_decay),
+		beta_regularizer=l2(weight_decay))(x)
+		x = Activation('relu')(x)
+		x = UpSampling2D((2,2))(x)
+		x = Conv2D(int(nb_filters),(3,3),padding='same',
+		dilation_rate = dilate_rate,kernel_initializer='he_uniform',
+		kernel_regularizer=l2(weight_decay),use_bias=False)(x)
+		x = BatchNormalization(gamma_regularizer=l2(weight_decay),
+		beta_regularizer=l2(weight_decay))(x)
+		x = Activation('relu')(x)
+		x = UpSampling2D((2,2))(x)
+		return x
+
 	def densemodel(self,no_layers,dilate_rate,grow_rt,nb_filters,nb_classes,
-	weight_decay,drop_rate,nb_blocks,compression):
+	weight_decay,drop_rate,nb_blocks,compression,upsampling):
 		""" Create a model with 3 DenseBlocks, starts with an initial convolution (3x3)"""
 		inputs = Input(shape=X_train.shape[1:])
 
 		#initial convolution
-		x = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = dilate_rate,
+		x_start = Conv2D(nb_filters,(3,3),padding='same', dilation_rate = dilate_rate,
 			kernel_initializer='he_uniform',kernel_regularizer=l2(weight_decay),use_bias=False,name="initial_conv2D")(inputs)
 
 		#create denseblocks
 		for i in range(0,nb_blocks-1):
-			x, nb_filters = self.DenseBlock(x,no_layers=no_layers,
-			nb_filters=nb_filters,grow_rt=grow_rt,
-			drop_rate=drop_rate, dilate_rate = dilate_rate,
-			weight_decay = weight_decay,compression = compression)
+			if i == 0:
+				x, nb_filters = self.DenseBlock(x=x_start,no_layers=no_layers,
+				nb_filters=nb_filters,grow_rt=grow_rt,
+				drop_rate=drop_rate, dilate_rate = dilate_rate,
+				weight_decay = weight_decay,compression = compression)
 
-			x = self.transitionLayer(x,nb_filters=nb_filters,
-			dilate_rate =dilate_rate, weight_decay = weight_decay,
-			drop_rate = drop_rate, compression = compression)
+				x = self.transitionLayer(x,nb_filters=nb_filters,
+				dilate_rate =dilate_rate, weight_decay = weight_decay,
+				drop_rate = drop_rate, compression = compression)
+			else:
+				x, nb_filters = self.DenseBlock(x,no_layers=no_layers,
+				nb_filters=nb_filters,grow_rt=grow_rt,
+				drop_rate=drop_rate, dilate_rate = dilate_rate,
+				weight_decay = weight_decay,compression = compression)
+
+				x = self.transitionLayer(x,nb_filters=nb_filters,
+				dilate_rate =dilate_rate, weight_decay = weight_decay,
+				drop_rate = drop_rate, compression = compression)
 
 		# finish with denseblock without transition - BC-relu-GAP-prediction
 		x, nb_filters = self.DenseBlock(x,no_layers=no_layers,
 		nb_filters=nb_filters,grow_rt=grow_rt, drop_rate=drop_rate,
 		dilate_rate = dilate_rate, weight_decay = weight_decay,compression = compression)
+
+		if upsampling == '1':
+			x_end = self.Upsampling(x,no_layers,nb_filters,grow_rt,drop_rate,dilate_rate,
+			weight_decay,compression)
+			x = concatenate([x_start,x_end])
 
 		x = BatchNormalization(gamma_regularizer=l2(weight_decay),
 		beta_regularizer=l2(weight_decay))(x)
@@ -168,7 +197,8 @@ if __name__ == "__main__":
 	model = init.densemodel(no_layers=int(sys.argv[2]),dilate_rate=1,
 	grow_rt=int(sys.argv[3]),nb_filters=int(sys.argv[4]),
 	nb_classes=int(sys.argv[5]),weight_decay=1E-4,drop_rate=0.2,
-	nb_blocks=int(sys.argv[7]),compression = float(sys.argv[8]))
+	nb_blocks=int(sys.argv[7]),compression = float(sys.argv[8]),
+	upsampling = sys.argv[9])
 
 	opt =  SGD(lr=0.1,momentum=0.9)
 	model.compile(optimizer=opt,
@@ -176,7 +206,7 @@ if __name__ == "__main__":
 			  metrics=['accuracy'])
 	data_aug=sys.argv[6]
 
-	if data_aug:
+	if data_aug == '1':
 		datagen = ImageDataGenerator(
 			featurewise_center=False,  # set input mean to 0 over the dataset
 			samplewise_center=False,  # set each sample mean to 0
@@ -191,8 +221,7 @@ if __name__ == "__main__":
 
 		model.fit_generator(datagen.flow(X_train, Y_train,
 									 batch_size=64),
-						steps_per_epoch=782,
-			epochs=epochs,
+						steps_per_epoch=782,epochs=epochs,
 						validation_data=(X_test, Y_test),
 						workers=4,callbacks=[lrate])
 	else:
