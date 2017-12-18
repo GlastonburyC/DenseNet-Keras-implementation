@@ -146,9 +146,11 @@ if __name__ == "__main__":
 	        height_shift_range=0.2,  # randomly shift images vertically (fraction of total height)
 	        horizontal_flip=True,  # randomly flip images
 	        vertical_flip=False)  # randomly flip images
+		
 		model.fit_generator(datagen.flow(X_train, Y_train,
                                      batch_size=64),
                         steps_per_epoch=782,
+			epochs=epochs,
                         validation_data=(X_test, Y_test),
                         workers=4,callbacks=[lrate])
 	else:
