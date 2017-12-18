@@ -148,7 +148,7 @@ if __name__ == "__main__":
 	        vertical_flip=False)  # randomly flip images
 		model.fit_generator(datagen.flow(X_train, Y_train,
                                      batch_size=64),
-                        epochs=epochs,
+                        steps_per_epoch=782,
                         validation_data=(X_test, Y_test),
                         workers=4,callbacks=[lrate])
 	else:
