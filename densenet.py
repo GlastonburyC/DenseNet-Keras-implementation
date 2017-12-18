@@ -2,7 +2,7 @@
 
 # no_layers = int(((depth-4)/3)/2) < for compression else no_layers = int((depth-4)/3)
 
-# DenseNet k =12 Depth = 40 - sys.argv = [300, 12, 12, 16, 10, False, 3]
+# DenseNet k =12 Depth = 40 - sys.argv = [300, 12, 12, 16, 10, False, 3, 1]
 
 # DenseNet-BC k =12, Depth = 100 - sys.argv = [300, 16, 12, 24, 10, False, 3, 0.5]
 
@@ -53,7 +53,7 @@ class DenseNet():
 		return (X_train, Y_train), (X_test, Y_test)
 	def ConvBlock(self,x,nb_filters,drop_rate,dilate_rate,weight_decay,compression):
 		""" create a standard convolutional block, BN - rel - Conv2D (3x3) - Dropout """
-		if compression:
+		if compression != 1:
 			inter_ch = int(nb_filters*4)
 			x = BatchNormalization(gamma_regularizer=l2(weight_decay),beta_regularizer=l2(weight_decay))(x)
 			x = Activation('relu')(x)
@@ -74,7 +74,7 @@ class DenseNet():
 		x = BatchNormalization(gamma_regularizer=l2(weight_decay),
 		                       beta_regularizer=l2(weight_decay))(x)
 		x = Activation('relu')(x)
-		if compression:
+		if compression != 1:
 			inter_ch = int(nb_filters*compression)
 			x = Conv2D(inter_ch,(1,1),padding='same',dilation_rate = dilate_rate,kernel_initializer='he_uniform',use_bias=False,kernel_regularizer=l2(weight_decay))(x)
 		else:
@@ -124,16 +124,16 @@ def step_decay(epoch):
 lrate = LearningRateScheduler(step_decay)
 
 if __name__ == "__main__":
-	epochs=sys.argv[0]
+	epochs=int(sys.argv[1])
 	init = DenseNet()
 	(X_train, Y_train), (X_test, Y_test) = init.load_cifar()
-	model = init.densemodel(no_layers=sys.argv[1],dilate_rate=1,grow_rt=sys.argv[2],nb_filters=sys.argv[3],
-							nb_classes=sys.argv[4],weight_decay=1E-4,drop_rate=0.2,nb_blocks=sys.argv[6],compression = sys.argv[7])
+	model = init.densemodel(no_layers=int(sys.argv[2]),dilate_rate=1,grow_rt=int(sys.argv[3]),nb_filters=int(sys.argv[4]),
+							nb_classes=int(sys.argv[5]),weight_decay=1E-4,drop_rate=0.2,nb_blocks=int(sys.argv[7]),compression = float(sys.argv[8]))
 	opt =  SGD(lr=0.1,momentum=0.9)
 	model.compile(optimizer=opt,
 	          loss='categorical_crossentropy',
 	          metrics=['accuracy'])
-	data_aug=sys.argv[5]
+	data_aug=sys.argv[6]
 	if data_aug:
 		datagen = ImageDataGenerator(
 	        featurewise_center=False,  # set input mean to 0 over the dataset
@@ -155,3 +155,6 @@ if __name__ == "__main__":
 	                     batch_size=64,
 	                    epochs=epochs,
 	                    validation_data=(X_test, Y_test),callbacks=[lrate])
+
+
+
