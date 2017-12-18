@@ -13,6 +13,9 @@ DenseNet-BC growth rate 12, inital conv filters 24, L = 100. (~800k parameters)
 
 To implement Densenet with growth_rate = 12, Layers = 40:
 
+
+To reproduce my results - Just run:
+
 ~~~python 
 python densenet.py 300, 12, 12, 16, 10, False, 3
 ~~~
