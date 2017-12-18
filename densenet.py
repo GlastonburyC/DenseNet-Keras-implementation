@@ -147,10 +147,10 @@ if __name__ == "__main__":
 	        horizontal_flip=True,  # randomly flip images
 	        vertical_flip=False)  # randomly flip images
 		model.fit_generator(X_train, Y_train,
-                    steps_per_epoch = round(50000/batch_size),   #num_train_images // batch_size,
+                    steps_per_epoch = round(50000/64),   #num_train_images // batch_size,
                     epochs = epochs,
                     validation_data=(X_test, Y_test),
-                    validation_steps = round(50000/batch_size),  #num_val_images // batch_size,
+                    validation_steps = round(50000/64),  #num_val_images // batch_size,
                     workers = 16,
                     callbacks = [lrate])
 	else:
