@@ -146,7 +146,7 @@ if __name__ == "__main__":
 	        height_shift_range=0.2,  # randomly shift images vertically (fraction of total height)
 	        horizontal_flip=True,  # randomly flip images
 	        vertical_flip=False)  # randomly flip images
-		InceptionV3_model.fit_generator(X_train, Y_train,
+		model.fit_generator(X_train, Y_train,
                     steps_per_epoch = round(50000/batch_size),   #num_train_images // batch_size,
                     epochs = epochs,
                     validation_data=(X_test, Y_test),
