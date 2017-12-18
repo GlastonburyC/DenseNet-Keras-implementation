@@ -31,8 +31,8 @@ DenseNet-BC growth rate 12, inital conv filters 24, L = 100. (~800k parameters)
 
 To implement Densenet with growth_rate = 12, Layers = 40:
 
-```python python densenet.py 300, 12, 12, 16, 10, False, 3```
+`python python densenet.py 300, 12, 12, 16, 10, False, 3`
 
 To implement Densenet-BC with Layers = 100, compression = 0.5:
 
-```python python densenet.py 300, 16, 12, 24, 10, False, 3, 0.5```
+`python python densenet.py 300, 16, 12, 24, 10, False, 3, 0.5`
