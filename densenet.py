@@ -206,11 +206,19 @@ if __name__ == "__main__":
 	(X_train, Y_train), (X_test, Y_test) = init.load_cifar()
 
 	# initialise the densemodel from DenseNet class
+<<<<<<< HEAD
 	model = init.densemodel(no_layers=args['layers'],dilate_rate=1,
 	grow_rt=args['growth'],nb_filters=args['filters'],
 	nb_classes=args['classes'],weight_decay=1E-4,drop_rate=0.2,
 	nb_blocks=args['blocks'],compression = args['compression'],
 	upsampling = args['upsample'])
+=======
+	model = init.densemodel(no_layers=int(sys.argv[2]),dilate_rate=1,
+	grow_rt=int(sys.argv[3]),nb_filters=int(sys.argv[4]),
+	nb_classes=int(sys.argv[5]),weight_decay=1E-4,drop_rate=0.2,
+	nb_blocks=int(sys.argv[7]),compression = float(sys.argv[8]),
+	upsampling = sys.argv[9])
+>>>>>>> 5715f1a442ccc36a6036ab9c2d81dca9b85c930a
 
 	opt =  SGD(lr=0.1,momentum=0.9)
 	model.compile(optimizer=opt,
