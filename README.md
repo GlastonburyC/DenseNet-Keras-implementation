@@ -2,44 +2,41 @@
 
 An implementation of the DenseNet architecture with growth rate = 12, L = 40 (~1M parameters).
 
-Trained on CIFAR10 without data augmentation:
+Use:
 
-```validation error rate 6.22%```
+~~~python
+usage: densenet.py [-h] [--epochs EPOCHS] [--layers LAYERS] [--growth GROWTH]
+                   [--filters FILTERS] [--classes CLASSES] [--blocks BLOCKS]
+                   [--aug AUG] [--compression COMPRESSION]
+                   [--upsample UPSAMPLE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --epochs EPOCHS       Number of epochs to run
+  --layers LAYERS       Number of layers defined as (depth-4)/no_dense_blocks
+  --growth GROWTH       k - How many filters to add each convolution
+  --filters FILTERS     Number of inital conv_filter
+  --classes CLASSES     Number of output classes
+  --blocks BLOCKS       Number of Dense blocks
+  --aug AUG             To perform data augmentation, set to 1
+  --compression COMPRESSION
+                        [0-1] to specify bottleneck compression (0.5)
+  --upsample UPSAMPLE   Upsample and concatenate initial conv to last conv
+  ~~~
+
 
 DenseNet-BC growth rate 12, inital conv filters 24, L = 100. (~800k parameters)
 
-```Validation error rate 5.44%```
+To implement Densenet with growth_rate = 12, Layers = 40 - CIFAR10 validation error rate 6.22%:
 
-
-To implement Densenet with growth_rate = 12, Layers = 40:
-
-
-To reproduce my results - Just run:
+To reproduce:
 
 ~~~ 
 python densenet.py --upsample 1
 ~~~
 
-To implement Densenet-BC with Layers = 100, compression = 0.5:
+To implement Densenet-BC with Layers = 100, compression = 0.5 - Validation error rate 5.44%:
 
 ~~~ 
 python densenet.py --upsample 1 --growth 12 --filters 24 --compression 0.5 --layers 16
 ~~~
-
-
-*All experiments without data augmentation and with set seed, 42.
-
-I used the following learning schedule for 300 epochs ```(SGD - initial_lr = 0.1, momentum=0.90)```
-
-~~~~python
-def step_decay(epoch):
-	initial_lrate = 0.1
-	lrate = 0.1
-	if epoch >= 50 and epoch < 150:
-		lrate = initial_lrate / 10
-	if epoch >= 150 and epoch < 225:
-		lrate = initial_lrate / 100
-	if epoch >= 225:
-		lrate = initial_lrate / 1000
-	return float(lrate)
-~~~~
