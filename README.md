@@ -2,8 +2,6 @@
 
 An implementation of the DenseNet architecture with growth rate = 12, L = 40 (~1M parameters).
 
-Use:
-
 ~~~
 usage: densenet.py [-h] [--epochs EPOCHS] [--layers LAYERS] [--growth GROWTH]
                    [--filters FILTERS] [--classes CLASSES] [--blocks BLOCKS]
@@ -40,3 +38,6 @@ To implement Densenet-BC with Layers = 100, compression = 0.5 - Validation error
 ~~~ 
 python densenet.py --upsample 1 --growth 12 --filters 24 --compression 0.5 --layers 16
 ~~~
+
+
+I also tested whether adding an upsampling and concatenation layer improved the results - The logic was to have a skip connection between the last conv2d and the input_conv2d - Whilst the parameter space more than doubles (2.8M) for Densenet k=12, L=40 - the accuracy doesn't change.
