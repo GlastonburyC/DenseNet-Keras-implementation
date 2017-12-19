@@ -30,13 +30,13 @@ To implement Densenet with growth_rate = 12, Layers = 40 - CIFAR10 validation er
 To reproduce:
 
 ~~~ 
-python densenet.py --upsample 1
+python densenet.py --upsample 0
 ~~~
 
 To implement Densenet-BC with Layers = 100, compression = 0.5 - Validation error rate 5.44%:
 
 ~~~ 
-python densenet.py --upsample 1 --growth 12 --filters 24 --compression 0.5 --layers 16
+python densenet.py --upsample 0 --growth 12 --filters 24 --compression 0.5 --layers 16
 ~~~
 
 
