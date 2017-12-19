@@ -4,7 +4,7 @@ An implementation of the DenseNet architecture with growth rate = 12, L = 40 (~1
 
 Use:
 
-~~~python
+~~~
 usage: densenet.py [-h] [--epochs EPOCHS] [--layers LAYERS] [--growth GROWTH]
                    [--filters FILTERS] [--classes CLASSES] [--blocks BLOCKS]
                    [--aug AUG] [--compression COMPRESSION]
