@@ -30,7 +30,7 @@ from keras.optimizers import Adam, SGD,RMSprop
 
 from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import ReduceLROnPlateau, LearningRateScheduler
+from keras.callbacks import LearningRateScheduler,ModelCheckpoint
 
 
 # setup the parameters - user specified
@@ -217,7 +217,8 @@ if __name__ == "__main__":
 			  loss='categorical_crossentropy',
 			  metrics=['accuracy'])
 	data_aug = args['aug']
-
+	save_best = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, 
+				    save_weights_only=False, mode='auto', period=1)
 	if data_aug == '1':
 		datagen = ImageDataGenerator(
 			featurewise_center=False,  # set input mean to 0 over the dataset
@@ -235,9 +236,9 @@ if __name__ == "__main__":
 									 batch_size=64),
 						steps_per_epoch=782,epochs=epochs,
 						validation_data=(X_test, Y_test),
-						workers=4,callbacks=[lrate])
+						workers=4,callbacks=[lrate,save_best])
 	else:
 		model.fit(X_train, Y_train,
 						 batch_size=64,
 						epochs=epochs,
-						validation_data=(X_test, Y_test),callbacks=[lrate])
+						validation_data=(X_test, Y_test),callbacks=[lrate,save_best])
