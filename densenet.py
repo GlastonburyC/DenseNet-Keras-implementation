@@ -199,6 +199,7 @@ if __name__ == "__main__":
 	arg_list.add_argument('--aug', help='To perform data augmentation, set to 1', default='0', type=str)
 	arg_list.add_argument('--compression', help='[0-1] to specify bottleneck compression (0.5)', default='1', type=float)
 	arg_list.add_argument('--upsample', help='Upsample and concatenate initial conv to last conv', default='0', type=str)
+	arg_list.add_argument('--weights', help='Save weights', default='0', type=str)
 	args = vars(arg_list.parse_args())
 
 	epochs=args['epochs']
@@ -211,6 +212,7 @@ if __name__ == "__main__":
 	nb_classes=args['classes'],weight_decay=1E-4,drop_rate=0.2,
 	nb_blocks=args['blocks'],compression = args['compression'],
 	upsampling = args['upsample'])
+	filepath = args['weights'])
 
 	opt =  SGD(lr=0.1,momentum=0.9)
 	model.compile(optimizer=opt,
